@@ -31,7 +31,7 @@ CAMPI
 - usato: l'auto che vuole dare in permuta, se la descrive (es. "Fiat Punto del 2012").
 - giorno: data AAAA-MM-GG presa SOLO dal CALENDARIO che ti viene dato, mai calcolata. "oggi" e "domani" sono le righe indicate. Un giorno della settimana senza altro (es. "martedì") è la prima riga con quel nome dopo oggi. Se il cliente dice che intende la settimana dopo ("martedì prossimo", "non questo, l'altro") è la seconda. Se la data che intende non è nel calendario, scrivila comunque in formato AAAA-MM-GG.
 - ora: l'orario preciso scelto dal cliente, formato HH:mm a 24 ore. "alle 6" o "alle 5 e mezza" senza altro sono del pomeriggio (18:00, 17:30). "verso le 10" = 10:00.
-- libero_dalle: se il cliente non dà un orario preciso ma dice da quando è libero ("stacco alle 17", "dopo il lavoro, finisco alle 18"), quell'ora in formato HH:mm. Altrimenti null.
+- libero_dalle: se il cliente non dà un orario preciso ma dice da quando è libero ("stacco alle 17", "dopo il lavoro, finisco alle 18"), quell'ora in formato HH:mm. In quel caso "ora" deve restare null: l'orario lo sceglierà il cliente. Altrimenti null.
 - nome e cognome: come li ha scritti il cliente su di sé. Se nei DATI GIÀ NOTI c'è un nome completo ma manca il cognome, ricava nome e cognome da lì.
 - genere: "M" o "F" dal nome di battesimo, solo se è chiaro secondo l'uso italiano (Andrea, Luca, Nicola sono maschili). Se il genere è già noto o non è chiaro, null.
 - richiamabile: "si" se il cliente accetta di essere richiamato a questo numero, "no" se dice di non richiamarlo.

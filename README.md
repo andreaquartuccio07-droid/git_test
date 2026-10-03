@@ -1,5 +1,9 @@
 # Assistente WhatsApp per autosaloni
 
+> **Dove siamo:** il bot in uso è quello in **n8n** (vedi `n8n/LEGGIMI.md`). Questo programma
+> è una versione alternativa tenuta pronta per quando servirà più robustezza o più saloni;
+> le regole della conversazione sono le stesse nei due.
+
 Risponde su WhatsApp, anche la sera e la domenica, ai clienti che arrivano dai portali (AutoScout24, Subito, Automobile.it…), dal sito del salone e dalle chiamate perse. Raccoglie budget, pagamento e permuta, poi fissa l'appuntamento in salone e avvisa il venditore.
 
 ## Come è fatto
