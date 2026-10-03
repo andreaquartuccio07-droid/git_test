@@ -15,11 +15,11 @@ import {
   domanda,
   domandaRiformulata,
   frasi,
-  primoMessaggio,
   ringraziamento,
   rispostaADomanda,
   type Dato,
 } from "./frasi.js";
+import { primoContatto, type MessaggioTemplate } from "./primo-contatto.js";
 
 /** Cose successe nella conversazione che il venditore deve sapere. */
 export type Evento =
@@ -28,7 +28,9 @@ export type Evento =
   | { tipo: "da_richiamare"; motivo: string }
   | { tipo: "non_interessato" }
   | { tipo: "domanda_per_venditore"; testo: string }
-  | { tipo: "messaggio_senza_risposta"; motivo: string };
+  | { tipo: "messaggio_senza_risposta"; motivo: string }
+  | { tipo: "nuova_richiesta"; canale: string; fonte: string | null; auto: string | null }
+  | { tipo: "invio_fallito"; errore: string };
 
 export interface Esito {
   /** Il messaggio da mandare al cliente, oppure null se il bot deve restare zitto. */
@@ -65,10 +67,9 @@ export function prossimoDato(lead: Lead, salone: Salone): Dato | null {
   return null;
 }
 
-/** Il primo messaggio al cliente appena arriva il lead. */
-export function avviaConversazione(lead: Lead, salone: Salone, adesso: DateTime): string {
-  const dato = prossimoDato(lead, salone) ?? "giorno";
-  return primoMessaggio(lead, salone, adesso, dato);
+/** Il primo messaggio al cliente appena arriva il lead: è sempre un template WhatsApp. */
+export function avviaConversazione(lead: Lead, salone: Salone, adesso: DateTime): MessaggioTemplate {
+  return primoContatto(lead, salone, adesso);
 }
 
 export async function gestisciMessaggio(ingresso: Ingresso, interprete: Interprete): Promise<Esito> {
@@ -79,7 +80,13 @@ export async function gestisciMessaggio(ingresso: Ingresso, interprete: Interpre
     ultimoMessaggioIl: adesso.toISO(),
   };
   const eventi: Evento[] = [];
-  const esito = (risposta: string | null): Esito => ({ risposta, lead, eventi });
+  // Se è il cliente a scrivere per primo, il bot si presenta.
+  const presentati = !storico.some((m) => m.autore === "bot");
+  const esito = (risposta: string | null): Esito => ({
+    risposta: risposta && presentati ? `${frasi.presentazione(salone, adesso)} ${risposta}` : risposta,
+    lead,
+    eventi,
+  });
 
   // Se la chat è passata a una persona, o il cliente ha chiesto di non essere
   // contattato, il bot non risponde: il messaggio lo vede il venditore.

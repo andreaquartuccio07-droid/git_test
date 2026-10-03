@@ -46,7 +46,7 @@ const interprete = new InterpreteClaude();
 const storico: Messaggio[] = [];
 const rl = createInterface({ input: stdin, output: stdout });
 
-const primo = avviaConversazione(lead, saloneDemo, adesso());
+const primo = avviaConversazione(lead, saloneDemo, adesso()).testo;
 storico.push({ autore: "bot", testo: primo, il: adesso().toISO()! });
 console.log(`\nBOT: ${primo}\n`);
 

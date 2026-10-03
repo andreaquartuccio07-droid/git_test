@@ -7,7 +7,7 @@ import {
 } from "../src/ai/interpretazione.js";
 import { saloneDemo } from "../src/config/salone-demo.js";
 import type { Lead, Messaggio } from "../src/dominio/tipi.js";
-import { gestisciMessaggio, type Esito } from "../src/motore/motore.js";
+import { avviaConversazione, gestisciMessaggio, type Esito } from "../src/motore/motore.js";
 
 /** Lunedì 5 ottobre 2026 alle 20:30: il salone è chiuso, il bot lavora. */
 export const LUNEDI_SERA = DateTime.fromISO("2026-10-05T20:30", { zone: "Europe/Rome" });
@@ -57,11 +57,18 @@ export class InterpreteFinto implements Interprete {
 export class Conversazione {
   storico: Messaggio[] = [];
   ultimo!: Esito;
+  /** Di base la conversazione parte dal primo messaggio del bot, come nella realtà. */
   constructor(
     public lead: Lead,
     private readonly interprete: Interprete,
     private readonly adesso = LUNEDI_SERA,
-  ) {}
+    iniziaIlBot = true,
+  ) {
+    if (iniziaIlBot) {
+      const primo = avviaConversazione(lead, saloneDemo, adesso);
+      this.storico.push({ autore: "bot", testo: primo.testo, il: adesso.toISO()! });
+    }
+  }
 
   async cliente(testo: string): Promise<string | null> {
     this.ultimo = await gestisciMessaggio(

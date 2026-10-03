@@ -7,7 +7,7 @@ const mattinaEPomeriggio = [
 
 /** Il salone usato per le demo. Un salone vero avrà la sua riga nel database. */
 export const saloneDemo: Salone = {
-  id: "demo",
+  id: "00000000-0000-4000-8000-000000000001",
   nome: "Autosalone Demo",
   citta: "Livorno",
   indirizzo: "Via dell'Esempio 1, Livorno",
@@ -24,4 +24,5 @@ export const saloneDemo: Salone = {
   finanziamenti: true,
   documentiFinanziamento: "un documento d'identità, il codice fiscale e l'ultima busta paga",
   oraSera: 17,
+  whatsappPhoneNumberId: process.env.DEMO_WHATSAPP_PHONE_NUMBER_ID ?? null,
 };

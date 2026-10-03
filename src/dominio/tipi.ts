@@ -25,6 +25,8 @@ export interface Salone {
   documentiFinanziamento: string;
   /** Ora (0-23) da cui si passa da "Buongiorno" a "Buonasera". */
   oraSera: number;
+  /** Identificativo del numero WhatsApp del salone presso Meta. */
+  whatsappPhoneNumberId: string | null;
 }
 
 export type Canale = "portale" | "sito" | "chiamata_persa" | "whatsapp";
@@ -81,3 +83,6 @@ export interface Messaggio {
   testo: string;
   il: string;
 }
+
+/** Tipo di messaggio WhatsApp: il bot legge solo il testo. */
+export type TipoMessaggio = "testo" | "vocale" | "immagine" | "altro";

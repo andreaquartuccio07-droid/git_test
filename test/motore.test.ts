@@ -4,17 +4,41 @@ import { avviaConversazione } from "../src/motore/motore.js";
 import { Conversazione, InterpreteFinto, LUNEDI_SERA, nuovoLead } from "./aiuti.js";
 
 describe("primo messaggio", () => {
-  it("lead da portale: saluta per cognome, ringrazia per l'auto e chiede il budget", () => {
+  it("lead da portale: template con il nome del salone e l'auto, poi chiede il budget", () => {
     const lead = nuovoLead({ nome: "Mario", cognome: "Rossi", genere: "M", autoInteresse: "Ford Fiesta" });
-    expect(avviaConversazione(lead, saloneDemo, LUNEDI_SERA)).toBe(
-      "Buonasera signor Rossi, sono l'assistente di Autosalone Demo. La ringrazio per la richiesta sulla Ford Fiesta. Mi saprebbe indicare un budget di massima?",
+    expect(avviaConversazione(lead, saloneDemo, LUNEDI_SERA)).toEqual({
+      nome: "primo_contatto_richiesta_auto_sera",
+      parametri: ["Autosalone Demo", "Ford Fiesta"],
+      testo:
+        "Buonasera, sono l'assistente di Autosalone Demo. La ringrazio per la richiesta sulla Ford Fiesta. Mi saprebbe indicare un budget di massima?",
+    });
+  });
+
+  it("lead senza auto: chiede quale auto cercava", () => {
+    expect(avviaConversazione(nuovoLead({ canale: "sito" }), saloneDemo, LUNEDI_SERA).testo).toBe(
+      "Buonasera, sono l'assistente di Autosalone Demo. La ringrazio per la sua richiesta. Mi dice per quale auto ci aveva cercato?",
     );
   });
 
   it("chiamata persa: spiega perché scrive e chiede che auto cercava", () => {
     const lead = nuovoLead({ canale: "chiamata_persa", fonte: null });
-    expect(avviaConversazione(lead, saloneDemo, LUNEDI_SERA.set({ hour: 11 }))).toBe(
-      "Buongiorno, sono l'assistente di Autosalone Demo. Ha chiamato poco fa e non siamo riusciti a risponderle. Mi dice per quale auto ci aveva cercato?",
+    expect(avviaConversazione(lead, saloneDemo, LUNEDI_SERA.set({ hour: 11 }))).toEqual({
+      nome: "primo_contatto_chiamata_persa_giorno",
+      parametri: ["Autosalone Demo"],
+      testo:
+        "Buongiorno, sono l'assistente di Autosalone Demo. Ha chiamato poco fa e non siamo riusciti a risponderle. Mi dice per quale auto ci aveva cercato?",
+    });
+  });
+
+  it("se è il cliente a scrivere per primo, il bot si presenta", async () => {
+    const c = new Conversazione(
+      nuovoLead({ canale: "whatsapp", fonte: null }),
+      new InterpreteFinto({ "salve, avete una Panda?": { auto_cercata: "Fiat Panda", domande: [{ tipo: "disponibilita_auto", testo: "avete una Panda?" }] } }),
+      LUNEDI_SERA,
+      false,
+    );
+    expect(await c.cliente("salve, avete una Panda?")).toBe(
+      "Buonasera, sono l'assistente di Autosalone Demo. Verifico con il venditore che sia ancora disponibile e le faccio sapere. Mi saprebbe indicare un budget di massima?",
     );
   });
 });

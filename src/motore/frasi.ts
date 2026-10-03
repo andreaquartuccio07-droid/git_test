@@ -121,24 +121,10 @@ export function conferma(lead: Lead, salone: Salone, data: string, ora: string):
   return parti.join(" ");
 }
 
-export function primoMessaggio(
-  lead: Lead,
-  salone: Salone,
-  adesso: DateTime,
-  primaDomanda: Dato,
-): string {
-  const t = titolo(lead);
-  const apertura = `${saluto(salone, adesso)}${t ? ` ${t}` : ""}, sono l'assistente di ${salone.nome}.`;
-  if (lead.canale === "chiamata_persa") {
-    return `${apertura} Ha chiamato poco fa e non siamo riusciti a risponderle. ${domanda("auto", lead, salone)}`;
-  }
-  const ringrazia = lead.autoInteresse
-    ? `La ringrazio per la richiesta sulla ${lead.autoInteresse}.`
-    : "La ringrazio per la sua richiesta.";
-  return `${apertura} ${ringrazia} ${domanda(primaDomanda, lead, salone)}`;
-}
-
 export const frasi = {
+  presentazione: (salone: Salone, adesso: DateTime) =>
+    `${saluto(salone, adesso)}, sono l'assistente di ${salone.nome}.`,
+  vocale: "Mi scusi, non riesco ad ascoltare i messaggi vocali né a vedere le foto: me lo può scrivere?",
   stop: (salone: Salone, adesso: DateTime) =>
     `Va bene, non la contatteremo più. ${congedo(salone, adesso)}.`,
   richiamo: (salone: Salone, adesso: DateTime) =>

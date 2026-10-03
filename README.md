@@ -31,8 +31,13 @@ Così il bot **non inventa mai** prezzi, disponibilità, orari o date: ogni fras
 | `src/motore/` | Il flusso della conversazione e tutte le frasi del bot |
 | `src/ai/` | L'interprete: cosa deve ricavare l'AI da un messaggio, e l'implementazione con Claude |
 | `src/config/` | La configurazione del salone demo |
+| `src/servizio/` | Collega WhatsApp, archivio e motore: crea i lead, riceve i messaggi, risponde |
+| `src/whatsapp/` | WhatsApp Cloud API di Meta: lettura dei webhook, verifica della firma, invio |
+| `src/archivio/` | Dove si salvano lead e messaggi: Postgres (Supabase) o in memoria |
+| `src/server/` | Il server HTTP: webhook di WhatsApp e API per creare i lead |
 | `src/cli/simula.ts` | Simulatore da terminale per chattare con il bot |
 | `supabase/migrations/` | Lo schema del database con i dati separati per salone |
+| `docs/configurare-whatsapp.md` | Come collegare WhatsApp per la demo |
 | `test/` | Conversazioni intere simulate, eseguite a ogni modifica |
 
 ### Più saloni, dati separati
@@ -45,7 +50,14 @@ Serve Node.js 20 o più recente.
 
 ```bash
 npm install
-npm test                                   # i test, senza AI
+npm test                                   # i test, senza AI né WhatsApp
+```
+
+I test dell'archivio su Postgres girano solo se indichi un database usa e getta (viene svuotato): `TEST_DATABASE_URL=postgresql://... npm test`.
+
+**Chattare col bot da terminale** (serve solo la chiave di Claude):
+
+```bash
 export ANTHROPIC_API_KEY=...               # chiave da console.anthropic.com
 npm run simula                             # lead da portale
 npm run simula -- chiamata_persa           # cliente che ha chiamato senza risposta
@@ -53,12 +65,35 @@ npm run simula -- chiamata_persa           # cliente che ha chiamato senza rispo
 
 Nel simulatore scrivi come se fossi il cliente. `/lead` mostra i dati raccolti, `/esci` chiude.
 
+**Il server** (configurazione in `.env.example`, collegamento a WhatsApp in `docs/configurare-whatsapp.md`):
+
+```bash
+npm run avvia
+```
+
+Senza `WHATSAPP_TOKEN` i messaggi vengono scritti a terminale invece che spediti; senza `DATABASE_URL` i dati restano in memoria.
+
+| Indirizzo | A cosa serve |
+|---|---|
+| `GET /webhook/whatsapp` | Verifica del webhook da parte di Meta |
+| `POST /webhook/whatsapp` | Messaggi dei clienti (solo con la firma di Meta) |
+| `POST /api/lead` | Nuovo lead da portale, sito o chiamata persa (con `ADMIN_TOKEN`) |
+| `GET /salute` | Controllo che il server sia acceso |
+
+### Come gestisce i messaggi
+
+- **Messaggi a raffica:** aspetta qualche secondo (`ATTESA_RISPOSTA_SECONDI`), legge tutti i messaggi arrivati e risponde una volta sola.
+- **Doppioni:** Meta a volte manda due volte lo stesso messaggio: il secondo viene scartato.
+- **Vocali e foto:** chiede gentilmente di scrivere.
+- **Se l'AI non risponde:** il cliente riceve "Un nostro venditore la richiamerà" e il lead passa a una persona.
+- **Primo messaggio:** è sempre un template approvato da Meta, come richiede WhatsApp.
+
 ## Stato dei lavori
 
 - [x] Motore della conversazione con le regole del salone
 - [x] Interpretazione dei messaggi con Claude
 - [x] Schema del database con più saloni separati
-- [ ] Server: ricezione messaggi WhatsApp (Cloud API di Meta) e invio risposte
+- [x] Server: ricezione messaggi WhatsApp (Cloud API di Meta) e invio risposte
 - [ ] Arrivo dei lead: email dei portali, modulo del sito, chiamate perse
 - [ ] Solleciti ai clienti che non rispondono (con template WhatsApp)
 - [ ] Pannello per il salone: lead, chat, appuntamenti, presa in carico del venditore
