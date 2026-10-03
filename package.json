@@ -1,0 +1,27 @@
+{
+  "name": "assistente-autosaloni",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Assistente WhatsApp per autosaloni di auto usate: risponde ai lead dei portali, del sito e delle chiamate perse e fissa gli appuntamenti in salone.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "simula": "tsx src/cli/simula.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "luxon": "^3.7.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.7.6",
+    "@types/node": "^26.6.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}
