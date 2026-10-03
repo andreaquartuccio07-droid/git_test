@@ -196,6 +196,23 @@ function prossimoDato() {
   return null;
 }
 
+// "oggi", "domani", "dopodomani" o un giorno della settimana scritto dal cliente.
+// "martedì" è il primo martedì da domani; "martedì prossimo" o "l'altro" il secondo.
+// Restituisce null se il cliente non nomina un giorno o ne nomina più di uno.
+function giornoDalTesto(t) {
+  const s = String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (/\bdopodomani\b/.test(s)) return calendario[2].data;
+  if (/\bdomani\b/.test(s)) return calendario[1].data;
+  if (/\boggi\b/.test(s)) return calendario[0].data;
+  const nomi = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'];
+  const trovati = nomi.filter((n) => new RegExp(`\\b${n}\\b`).test(s));
+  if (trovati.length !== 1) return null;
+  const wd = nomi.indexOf(trovati[0]) + 1;
+  const giorni = calendario.slice(1).filter((g) => giorno(g.data).weekday === wd);
+  const settimanaDopo = /prossim|l'altro|settimana dopo|non questo/.test(s);
+  return (settimanaDopo ? giorni[1] : giorni[0])?.data ?? null;
+}
+
 function dataEOra(iso) {
   const d = DateTime.fromISO(iso, { zone: ZONA });
   return [d.toISODate(), d.toFormat('HH:mm')];
@@ -280,6 +297,10 @@ function decidi() {
   }
 
   // 4. Giorno e ora: li controllano queste regole, non l'AI.
+  // Se il cliente propone un giorno ("giovedì", "domani", "martedì prossimo"), la data
+  // la calcola il codice: l'AI a volte sbaglia il giorno della settimana. Si corregge
+  // solo se anche l'AI ha capito che c'è una data: "a domani!" come saluto non sposta niente.
+  if (it.giorno) it.giorno = giornoDalTesto(testo) || it.giorno;
   // Se il cliente ha detto solo da che ora è libero ("stacco alle 17"), l'orario lo
   // sceglie lui tra due proposte: un orario indicato dall'AI qui non vale.
   if (it.libero_dalle) it.ora = null;

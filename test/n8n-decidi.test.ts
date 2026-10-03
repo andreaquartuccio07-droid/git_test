@@ -133,6 +133,23 @@ describe("nodo n8n Decidi risposta", () => {
     );
   });
 
+  it("il giorno scritto dal cliente vale più di quello indicato dall'AI", () => {
+    const pronto = { ...portale(), budget: "8000", finanziamento: false, permuta: false };
+    // Lunedì 5 ottobre sera: "giovedì" è l'8, anche se l'AI dice martedì 6.
+    expect(new ConversazioneN8n(pronto).cliente("posso giovedì alle 10?", { giorno: "2026-10-06", ora: "10:00" })).toBe(
+      "Perfetto signor Rossi, la aspettiamo giovedì 8 ottobre alle 10:00. Se le cambia qualcosa mi scriva qui.",
+    );
+    expect(new ConversazioneN8n(pronto).cliente("giovedì prossimo alle 10", { giorno: "2026-10-08", ora: "10:00" })).toMatch(/giovedì 15 ottobre/);
+    expect(new ConversazioneN8n(pronto).cliente("domani alle 10", { giorno: "2026-10-08", ora: "10:00" })).toMatch(/martedì 6 ottobre/);
+    // "a domani" come saluto, con l'appuntamento già fissato: non sposta niente.
+    const fissato = { ...pronto, data_appuntamento: "2026-10-06T08:00:00.000Z", stato: "appuntamento" };
+    expect(new ConversazioneN8n(fissato).cliente("perfetto, a domani!", { intento: "conferma" })).toBe(
+      "Grazie a lei, la aspettiamo martedì 6 ottobre alle 10:00.",
+    );
+    // Due giorni nominati: decide l'AI.
+    expect(new ConversazioneN8n(pronto).cliente("non martedì, mercoledì alle 10", { giorno: "2026-10-07", ora: "10:00" })).toMatch(/mercoledì 7 ottobre/);
+  });
+
   it("disdetta e spostamento", () => {
     const fissato = { ...portale(), budget: "8000", finanziamento: false, permuta: false, data_appuntamento: "2026-10-06T16:00:00.000Z", stato: "appuntamento" };
     const c1 = new ConversazioneN8n(fissato);
